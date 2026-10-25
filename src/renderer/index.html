@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:">
+<title>なかみ検索</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>なかみ検索</h1>
+    <div class="status" id="status" aria-live="polite"></div>
+  </header>
+
+  <section class="folders" aria-label="検索するフォルダ">
+    <div class="folders-head">
+      <h2>検索するフォルダ</h2>
+      <button class="btn primary" id="addFolder" type="button">フォルダを追加</button>
+      <button class="btn" id="rescan" type="button" title="すべてのフォルダを読み直します">読み直す</button>
+    </div>
+    <ul id="folderList" class="folder-list"></ul>
+    <div class="progress" id="progress" hidden><i></i></div>
+  </section>
+
+  <section class="search">
+    <input id="q" type="search" placeholder="キーワードを入力（スペース区切りで AND 検索）" autocomplete="off" aria-label="検索キーワード" autofocus>
+    <div class="opts">
+      <label><input type="checkbox" id="optName" checked> ファイル名</label>
+      <label><input type="checkbox" id="optBody" checked> 中身</label>
+      <label><input type="checkbox" id="optCase"> 大文字・小文字を区別</label>
+      <label><input type="checkbox" id="optRegex"> 正規表現</label>
+      <label>種類 <select id="optType"><option value="">すべて</option></select></label>
+      <span class="syntax"><code>"見積 書"</code> フレーズ　<code>-下書き</code> 除外　<code>Ctrl+F</code> 検索欄へ</span>
+    </div>
+  </section>
+
+  <section class="results" id="results" aria-live="polite"></section>
+</div>
+
+<dialog id="dlg">
+  <div class="dlg-head">
+    <h2 id="dlgTitle"></h2>
+    <span class="dlg-nav"><span id="dlgPos"></span>
+      <button class="mini" id="dlgPrev" type="button" aria-label="前の一致">▲</button>
+      <button class="mini" id="dlgNext" type="button" aria-label="次の一致">▼</button></span>
+    <button class="btn primary" id="dlgOpen" type="button">開く</button>
+    <button class="btn" id="dlgClose" type="button">閉じる</button>
+  </div>
+  <div class="dlg-body" id="dlgBody"></div>
+</dialog>
+<script src="renderer.js"></script>
+</body>
+</html>
