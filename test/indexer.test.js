@@ -6,6 +6,7 @@ const os = require('os');
 const path = require('path');
 const XLSX = require('xlsx');
 const { Index } = require('../src/indexer');
+const ocr = require('../src/ocr');
 
 // Minimal one-page PDF with the text "Quarterly invoice".
 function makePdf() {
@@ -40,6 +41,7 @@ test('index a folder, persist, and pick up changes', async () => {
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['品名', '金額'], ['コーヒー豆', 3200]]), '仕入');
   XLSX.writeFile(wb, path.join(dir, 'cost.xlsx'));
 
+  ocr.setWorkDir(path.join(root, 'ocrwork'));
   const store = path.join(root, 'store', 'index.json.gz');
   const idx = new Index(store);
   await idx.addFolder(dir);
@@ -50,6 +52,8 @@ test('index a folder, persist, and pick up changes', async () => {
   assert.strictEqual(idx.search('invoice').results[0].name, 'report.pdf');
   assert.strictEqual(idx.search('コーヒー豆').results[0].name, 'cost.xlsx');
   assert.strictEqual(idx.search('image').results[0].name, 'image.png');
+  await idx.ocrIdle(); // the fake png fails recognition without crashing
+  assert.ok(idx.files.get(path.join(dir, 'image.png')).error);
 
   idx.saveNow();
   const again = new Index(store);
@@ -68,5 +72,6 @@ test('index a folder, persist, and pick up changes', async () => {
 
   await again.removeFolder(dir);
   assert.strictEqual(again.stats().files, 0);
+  await ocr.shutdown();
   fs.rmSync(root, { recursive: true, force: true });
 });

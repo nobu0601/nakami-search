@@ -1,7 +1,7 @@
 {
   "name": "nakami-search",
   "productName": "なかみ検索",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "ファイル名と中身をまとめて検索するデスクトップアプリ",
   "main": "src/main.js",
   "private": true,
@@ -11,9 +11,15 @@
     "dist:win": "electron-builder --win nsis --publish never"
   },
   "dependencies": {
+    "@tesseract.js-data/eng": "^1.0.0",
+    "@tesseract.js-data/jpn": "^1.0.0",
     "chokidar": "3.6.0",
+    "electron-updater": "^6.3.9",
+    "jszip": "^3.10.1",
     "mammoth": "1.8.0",
     "pdfjs-dist": "3.11.174",
+    "pngjs": "^7.0.0",
+    "tesseract.js": "^5.1.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
@@ -27,14 +33,12 @@
     "files": [
       "src/**/*",
       "package.json",
-      "!**/node_modules/canvas/**"
-    ],
-    "asarUnpack": [
-      "node_modules/pdfjs-dist/cmaps/**",
-      "node_modules/pdfjs-dist/standard_fonts/**"
+      "!**/node_modules/canvas/**",
+      "!**/node_modules/@tesseract.js-data/*/4.0.0/**"
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -43,6 +47,14 @@
       "createDesktopShortcut": true,
       "shortcutName": "なかみ検索"
     },
-    "npmRebuild": false
+    "npmRebuild": false,
+    "asar": false,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "nobu0601",
+        "repo": "nakami-search"
+      }
+    ]
   }
 }

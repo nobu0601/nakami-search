@@ -58,12 +58,23 @@ function snippet(line, ranges, max = 160) {
   };
 }
 
+const byPath = (a, b) => a.d.path.localeCompare(b.d.path, 'ja');
+const SORTERS = {
+  relevance: (a, b) => (b.nameHit - a.nameHit) || (b.lineHits.length - a.lineHits.length) || byPath(a, b),
+  newest: (a, b) => (b.d.mtimeMs - a.d.mtimeMs) || byPath(a, b),
+  oldest: (a, b) => (a.d.mtimeMs - b.d.mtimeMs) || byPath(a, b),
+  name: (a, b) => a.d.name.localeCompare(b.d.name, 'ja', { numeric: true }) || byPath(a, b),
+  size: (a, b) => (b.d.size - a.d.size) || byPath(a, b),
+};
+
 /**
  * docs: iterable of { path, name, ext, size, mtimeMs, lines }
- * opts: { name, body, caseSensitive, regex, ext, limit }
+ * opts: { name, body, caseSensitive, regex, ext, limit,
+ *         since (ms, only files modified after), folder (path prefix),
+ *         sort: 'relevance' | 'newest' | 'oldest' | 'name' | 'size' }
  */
 function searchDocs(docs, query, opts = {}) {
-  const o = { name: true, body: true, caseSensitive: false, regex: false, ext: '', limit: 300, ...opts };
+  const o = { name: true, body: true, caseSensitive: false, regex: false, ext: '', limit: 300, since: 0, folder: '', sort: 'relevance', ...opts };
   const { terms, excludes } = parseQuery(query);
   if (!terms.length) return { total: 0, totalLines: 0, results: [] };
   let mk, ex;
@@ -73,6 +84,8 @@ function searchDocs(docs, query, opts = {}) {
   const hits = [];
   for (const d of docs) {
     if (o.ext && d.ext !== o.ext) continue;
+    if (o.since && d.mtimeMs < o.since) continue;
+    if (o.folder && !d.path.startsWith(o.folder)) continue;
     const searchPath = norm(d.path);
     if (ex.some((re) => test(re, searchPath))) continue;
     const seen = mk.map((re) => o.name && test(re, searchPath));
@@ -92,10 +105,10 @@ function searchDocs(docs, query, opts = {}) {
     if (!nameHit && !lineHits.length) continue;
     hits.push({ d, nameHit, lineHits });
   }
-  hits.sort((a, b) => (b.nameHit - a.nameHit) || (b.lineHits.length - a.lineHits.length) || a.d.path.localeCompare(b.d.path, 'ja'));
+  hits.sort(SORTERS[o.sort] || SORTERS.relevance);
 
   const results = hits.slice(0, o.limit).map(({ d, nameHit, lineHits }) => ({
-    path: d.path, name: d.name, ext: d.ext, size: d.size, mtimeMs: d.mtimeMs, nameHit,
+    path: d.path, name: d.name, ext: d.ext, size: d.size, mtimeMs: d.mtimeMs, nameHit, ocr: !!d.ocr,
     nameRanges: findRanges(norm(d.name), mk),
     pathRanges: findRanges(norm(d.path), mk),
     lineCount: lineHits.length,

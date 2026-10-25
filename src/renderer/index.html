@@ -11,7 +11,12 @@
   <header class="top">
     <h1>なかみ検索</h1>
     <div class="status" id="status" aria-live="polite"></div>
+    <button class="btn" id="openSettings" type="button">設定</button>
   </header>
+  <div class="banner" id="updateBanner" hidden>
+    <span id="updateText"></span>
+    <button class="btn primary" id="installUpdate" type="button">再起動して更新</button>
+  </div>
 
   <section class="folders" aria-label="検索するフォルダ">
     <div class="folders-head">
@@ -24,14 +29,27 @@
   </section>
 
   <section class="search">
-    <input id="q" type="search" placeholder="キーワードを入力（スペース区切りで AND 検索）" autocomplete="off" aria-label="検索キーワード" autofocus>
+    <div class="qwrap">
+      <input id="q" type="search" placeholder="キーワードを入力（スペース区切りで AND 検索）" autocomplete="off" aria-label="検索キーワード" autofocus>
+      <button class="star" id="star" type="button" aria-pressed="false" title="この検索をお気に入りに保存">☆</button>
+      <div class="suggest" id="suggest" hidden></div>
+    </div>
     <div class="opts">
       <label><input type="checkbox" id="optName" checked> ファイル名</label>
       <label><input type="checkbox" id="optBody" checked> 中身</label>
       <label><input type="checkbox" id="optCase"> 大文字・小文字を区別</label>
       <label><input type="checkbox" id="optRegex"> 正規表現</label>
+    </div>
+    <div class="opts">
+      <label>更新日 <select id="optSince">
+        <option value="">すべて</option><option value="1">今日</option><option value="7">7日以内</option>
+        <option value="30">30日以内</option><option value="365">1年以内</option></select></label>
+      <label>フォルダ <select id="optFolder"><option value="">すべて</option></select></label>
       <label>種類 <select id="optType"><option value="">すべて</option></select></label>
-      <span class="syntax"><code>"見積 書"</code> フレーズ　<code>-下書き</code> 除外　<code>Ctrl+F</code> 検索欄へ</span>
+      <label>並べ替え <select id="optSort">
+        <option value="relevance">一致の多い順</option><option value="newest">新しい順</option><option value="oldest">古い順</option>
+        <option value="name">名前順</option><option value="size">サイズの大きい順</option></select></label>
+      <span class="syntax"><code>"見積 書"</code> フレーズ　<code>-下書き</code> 除外</span>
     </div>
   </section>
 
@@ -48,6 +66,47 @@
     <button class="btn" id="dlgClose" type="button">閉じる</button>
   </div>
   <div class="dlg-body" id="dlgBody"></div>
+</dialog>
+
+<dialog id="settings" class="settings">
+  <form id="settingsForm" method="dialog">
+    <div class="dlg-head">
+      <h2>設定</h2>
+      <button class="btn" id="settingsCancel" type="button">キャンセル</button>
+      <button class="btn primary" id="settingsSave" type="submit">保存</button>
+    </div>
+    <div class="set-body">
+      <fieldset>
+        <legend>呼び出しと常駐</legend>
+        <label class="field">呼び出しキー <select id="setShortcut"></select></label>
+        <p class="hint" id="shortcutHint"></p>
+        <label class="check"><input type="checkbox" id="setCloseToTray"> 閉じるボタンでタスクトレイに格納する（終了はトレイのメニューから）</label>
+        <label class="check"><input type="checkbox" id="setOpenAtLogin"> Windows の起動時に自動で起動する（トレイに格納した状態）</label>
+      </fieldset>
+      <fieldset>
+        <legend>文字認識</legend>
+        <label class="check"><input type="checkbox" id="setOcr"> 画像（png・jpg など）とスキャンした PDF の文字を読み取る</label>
+        <p class="hint">読み取りはバックグラウンドで 1 枚ずつ行います。枚数が多いと終わるまで時間がかかります。</p>
+      </fieldset>
+      <fieldset>
+        <legend>検索しないもの</legend>
+        <label class="field col" for="setExcludeNames">フォルダ名・ファイル名（1 行に 1 つ。<code>*</code> は任意の文字）</label>
+        <textarea id="setExcludeNames" rows="5" spellcheck="false"></textarea>
+        <label class="field col" for="setExcludeExts">拡張子（カンマ区切り。例: <code>mp4, zip, tmp</code>）</label>
+        <input id="setExcludeExts" type="text" spellcheck="false">
+        <p class="hint">「.」で始まる隠しファイルと、Office の一時ファイル（~$ で始まるもの）は常に除外します。保存すると索引を作り直します。</p>
+      </fieldset>
+      <fieldset>
+        <legend>検索履歴</legend>
+        <button class="btn" id="clearHistory" type="button">検索履歴を消す</button>
+      </fieldset>
+      <fieldset>
+        <legend>アップデート</legend>
+        <p class="hint" id="updateStatus"></p>
+        <button class="btn" id="checkUpdate" type="button">今すぐ確認</button>
+      </fieldset>
+    </div>
+  </form>
 </dialog>
 <script src="renderer.js"></script>
 </body>
