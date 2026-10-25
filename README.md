@@ -27,7 +27,7 @@ npm start       # アプリを起動
 npm run dist:win  # Windows インストーラーを作成（Windows 上で実行）
 ```
 
-`v1.0.0` のようなタグを push すると、GitHub Actions がインストーラーを作って Release に添付します。
+`main` に push すると、GitHub Actions がインストーラーを作り、`package.json` の version 名の Release に添付します。新しい版を出すときは version を上げてください。
 
 ## 構成
 
